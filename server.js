@@ -8,13 +8,14 @@ const register = require('./controllers/register');
 const signin = require('./controllers/signin');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');
+const mentorSignup = require('./controllers/mentorSignup');
 
 const db = knex({
   // connect to your own database here:
   client: 'pg',
   connection: {
     host : '127.0.0.1',
-    user : 'aneagoie',
+    user : 'akhilz',
     password : '',
     database : 'smart-brain'
   }
@@ -31,6 +32,8 @@ app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcry
 app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db)})
 app.put('/image', (req, res) => { image.handleImage(req, res, db)})
 app.post('/imageurl', (req, res) => { image.handleApiCall(req, res)})
+app.post('/mentorSignup', (req, res) => { mentorSignup.handleMentorSignup(req, res, db)})
+
 
 app.listen(3000, ()=> {
   console.log('app is running on port 3000');
