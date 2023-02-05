@@ -1,4 +1,5 @@
 const mentors = require('./mentors')
+const mentorsForMentee = require('./mentorsForMentee')
 
 const handleMentorSignup = (req, res, db) => {
   const { mentee, mentor } = req.body
@@ -6,7 +7,11 @@ const handleMentorSignup = (req, res, db) => {
   db.raw('select add_mentor_mentee_relationship(?,?)', [mentee, mentor])
     .then(results => {
       if (results.rowCount) {
-        mentors.getMentors(res, db)
+        mentorsForMentee.getMentorsForMentee({
+          params: {
+            menteeId: mentee
+          }
+        }, res, db)
         console.log(results.rows)
       } else {
         console.log("Error adding mentee to mentor")

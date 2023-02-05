@@ -10,6 +10,7 @@ const profile = require('./controllers/profile');
 const image = require('./controllers/image');
 const mentorSignup = require('./controllers/mentorSignup.js');
 const mentors = require('./controllers/mentors.js');
+const mentorsForMentee = require('./controllers/mentorsForMentee.js');
 
 
 const db = knex({
@@ -35,8 +36,8 @@ app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db) }
 app.put('/image', (req, res) => { image.handleImage(req, res, db) })
 app.post('/imageurl', (req, res) => { image.handleApiCall(req, res) })
 app.post('/mentorSignup', (req, res) => { mentorSignup.handleMentorSignup(req, res, db) })
-  app.get('/mentors', (req, res) => { mentors.getMentors( res, db) })
-
+// app.get('/mentors', (req, res) => { mentors.getMentors(req, res, db) })
+app.get('/mentors/:menteeId', (req, res) => { mentorsForMentee.getMentorsForMentee(req, res, db) })
 
 app.listen(3000, () => {
   console.log('app is running on port 3000');

@@ -1,8 +1,10 @@
+const MAX_MENTEE_CHOICES = 5;
+const MAX_MENTOR_SIGNUPS = 2;
 
 const getMentors = (res, db) => {
     // query = 'mentors.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees'
 
-    db.select("mentors.*", db.raw("(SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees"), db.raw("2 - (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS available_slots")).from('mentors')
+    db.select("mentors.*", db.raw("(SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees"), db.raw("? - (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS available_slots", [MAX_MENTOR_SIGNUPS])).from('mentors')
         .then(data => {
             if (data.length) {
                 console.log("Server returning all mentors")
@@ -16,7 +18,9 @@ const getMentors = (res, db) => {
 }
 
 module.exports = {
-    getMentors
+    getMentors, 
+    MAX_MENTEE_CHOICES,
+    MAX_MENTOR_SIGNUPS
 }
 
 // select mentors.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees from mentors;
