@@ -7,10 +7,14 @@ const handleSignin = (db, bcrypt) => (req, res) => {
     .where('email', '=', email)
     .then(data => {
       const isValid = bcrypt.compareSync(password, data[0].hash);
+
+      query = 'users.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentee_id = users.id) AS signups_total';
+
       if (isValid) {
-        return db.select('*').from('users')
+        return db.select(db.raw(query))
+          .from('users')
           .where('email', '=', email)
-          .then(user => {
+          .then(user => {console.log(user)
             res.json(user[0])
           })
           .catch(err => res.status(400).json('unable to get user'))
@@ -18,7 +22,9 @@ const handleSignin = (db, bcrypt) => (req, res) => {
         res.status(400).json('wrong credentials')
       }
     })
-    .catch(err => res.status(400).json('wrong credentials'))
+    .catch(err => {
+      res.status(400).json('wrong credentials' + err)
+    })
 }
 
 module.exports = {

@@ -3,7 +3,6 @@ const handleMentorSignup = (req, res, db) => {
     const { mentee, mentor } = req.body;
     db.raw('select add_mentor_mentee_relationship(?,?)', [mentor, mentee])
         .then(results => {
-            console.log(results);
             if (results.rowCount) {
               res.json("Success")
             } else {
