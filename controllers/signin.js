@@ -6,24 +6,30 @@ const handleSignin = (db, bcrypt) => (req, res) => {
   db.select('email', 'hash').from('login')
     .where('email', '=', email)
     .then(data => {
-      const isValid = bcrypt.compareSync(password, data[0].hash);
+      if (data[0]) {
+        const isValid = bcrypt.compareSync(password, data[0].hash);
 
-      query = 'users.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentee_id = users.id) AS signups_total';
+        query = 'users.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentee_id = users.id) AS signups_total';
 
-      if (isValid) {
-        return db.select(db.raw(query))
-          .from('users')
-          .where('email', '=', email)
-          .then(user => {console.log(user)
-            res.json(user[0])
-          })
-          .catch(err => res.status(400).json('unable to get user'))
-      } else {
-        res.status(400).json('wrong credentials')
+        if (isValid) {
+          return db.select(db.raw(query))
+            .from('users')
+            .where('email', '=', email)
+            .then(user => {
+              console.log(user)
+              res.json(user[0])
+            })
+            .catch(err => res.status(400).json('unable to get user'))
+        } else {
+          res.status(400).json('Wrong credentials')
+        }
+      } else{
+        res.status(400).json("User not registered. Try registering first")
       }
+
     })
     .catch(err => {
-      res.status(400).json('wrong credentials' + err)
+      res.status(400).json('Wrong credentials' + err)
     })
 }
 
