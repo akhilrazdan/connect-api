@@ -29,7 +29,7 @@ const getMentorsForMentee = (req, res, db) => {
 
     db.select("mentors.*",
         db.raw("(SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees"),
-        db.raw("2 - (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS available_slots"),
+        db.raw("? - (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS available_slots", [mentors.MAX_MENTOR_SIGNUPS]),
         db.raw("(CASE WHEN EXISTS (SELECT * FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id AND mentee_id = ?) THEN 'true' ELSE 'false' END) AS registered", [menteeId]))
         .from('mentors')
         .then(data => {

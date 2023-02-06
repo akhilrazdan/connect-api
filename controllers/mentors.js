@@ -1,5 +1,5 @@
-const MAX_MENTEE_CHOICES = 5;
-const MAX_MENTOR_SIGNUPS = 2;
+const MAX_MENTEE_CHOICES = 6;
+const MAX_MENTOR_SIGNUPS = 6;
 
 const getMentors = (res, db) => {
     // query = 'mentors.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees'
