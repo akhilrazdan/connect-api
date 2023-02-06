@@ -17,10 +17,10 @@ const db = knex({
   // connect to your own database here:
   client: 'pg',
   connection: {
-    host: '127.0.0.1',
+    host: process.env.DB_URI,
     user: 'akhilz',
-    password: '',
-    database: 'smart-brain'
+    password: process.env.DB_PASSWORD,
+    database: 'connections'
   }
 });
 
