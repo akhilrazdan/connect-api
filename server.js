@@ -20,11 +20,11 @@ const db = knex({
     // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a/connections
     // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com/connections
     // dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com
-    host: process.env.DB_URI || "postgres://dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com",
+    host: process.env.DB_URI || "dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com",
     user: 'akhilz',
     password: process.env.DB_PASSWORD || "XKT74yP5FQLlSo1fLXOhShT8J4s4TilC",
     database: 'connections',
-    ssl: true
+    ssl: { rejectUnauthorized: false }
   }
 });
 
