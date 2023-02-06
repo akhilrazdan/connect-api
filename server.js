@@ -17,9 +17,12 @@ const db = knex({
   // connect to your own database here:
   client: 'pg',
   connection: {
-    host: process.env.DB_URI,
+    // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a/connections
+    // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com/connections
+    // dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com
+    host: process.env.DB_URI || "postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com?ssl=true",
     user: 'akhilz',
-    password: process.env.DB_PASSWORD,
+    password: process.env.DB_PASSWORD || "XKT74yP5FQLlSo1fLXOhShT8J4s4TilC",
     database: 'connections'
   }
 });
