@@ -9,6 +9,7 @@ const signin = require('./controllers/signin');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');
 const mentorSignup = require('./controllers/mentorSignup.js');
+const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
 const mentorsForMentee = require('./controllers/mentorsForMentee.js');
 
@@ -20,11 +21,11 @@ const db = knex({
     // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a/connections
     // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com/connections
     // dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com
-    host: process.env.DB_URI || "dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com",
+    host: process.env.DB_URI || "127.0.0.1",
     user: 'akhilz',
-    password: process.env.DB_PASSWORD || "XKT74yP5FQLlSo1fLXOhShT8J4s4TilC",
-    database: 'connections',
-    ssl: { rejectUnauthorized: false }
+    password: process.env.DB_PASSWORD || "",
+    database: process.env.DB_NAME || "connectionsv2"
+    // ssl: { rejectUnauthorized: false }
   }
 });
 
@@ -36,7 +37,8 @@ app.use(express.json()); // latest version of exressJS now comes with Body-Parse
 app.get('/', (req, res) => { res.send('it is working') })
 app.post('/signin', signin.handleSignin(db, bcrypt))
 app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) })
-app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db) })
+app.post('/user', (req, res) => { users.handleUserPost(req, res, db) })
+app.get('/user/:id', (req, res) => { users.handleUserGet(req, res, db) })
 app.put('/image', (req, res) => { image.handleImage(req, res, db) })
 app.post('/imageurl', (req, res) => { image.handleApiCall(req, res) })
 app.post('/mentorSignup', (req, res) => { mentorSignup.handleMentorSignup(req, res, db) })
