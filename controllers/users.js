@@ -1,13 +1,13 @@
 
 const handleUserGet = (req, res, db) => {
-    const { id } = req.params;
+    const { uid } = req.params;
 
     // Check if the id is provided
-    if (!id) {
-        return res.status(400).json('No ID provided');
+    if (!uid) {
+        return res.status(400).json('No UID provided');
     }
 
-    db.select('*').from('users').where({ id })
+    db.select('*').from('users').where({ uid })
         .then(user => {
             if (user.length) {
                 res.json(user[0]);
