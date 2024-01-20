@@ -42,8 +42,16 @@ app.get('/user/:uid', (req, res) => { users.handleUserGet(req, res, db) })
 app.put('/image', (req, res) => { image.handleImage(req, res, db) })
 app.post('/imageurl', (req, res) => { image.handleApiCall(req, res) })
 app.post('/mentorSignup', (req, res) => { mentorSignup.handleMentorSignup(req, res, db) })
+app.get('/mentors', async (req, res) => {
+  try {
+    await mentors.getMentorsForMenteeId(req, res, db);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 // app.get('/mentors', (req, res) => { mentors.getMentors(req, res, db) })
-app.get('/mentors/:menteeId', (req, res) => { mentorsForMentee.getMentorsForMentee(req, res, db) })
+// app.get('/mentors/:menteeId', (req, res) => { mentorsForMentee.getMentorsForMentee(req, res, db) })
 
 app.listen(3000, () => {
   console.log('app is running on port 3000');

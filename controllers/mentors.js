@@ -17,8 +17,70 @@ const getMentors = (res, db) => {
         .catch(err => res.status(400).json(err))
 }
 
+const getMenteeDetails = async (db, uid) => {
+    try {
+        const menteeDetails = await db.select(
+            'mentees.email as menteeEmail',
+            'mentees.track_id as trackId',
+            'users.uid as userId',
+            'users.name as userName',
+            'users.joined as userJoined'
+        )
+            .from('mentees')
+            .leftJoin('users', 'mentees.email', 'users.email')
+            .where('users.uid', uid)
+            .first();  // Assuming UID is unique and you want a single record
+
+        if (!menteeDetails) {
+            throw new Error(`Mentee with UID ${uid} not found.`);
+        }
+
+        return menteeDetails;
+    } catch (error) {
+        console.error('Error fetching mentee details:', error);
+        throw error; // Rethrow the error to be handled by the caller
+    }
+};
+
+
+const getMenteeDepartment = async (db, menteeId) => {
+    // Fetch the mentee's department based on menteeId
+    const result = await db.select('track_id').from('users').where('uid', '=', menteeId).first();
+    if (!result) {
+        throw new Error(`Mentee with ID ${menteeId} not found.`);
+    }
+    return result.track_id;
+};
+
+const getMentorsByDepartment = async (db, track_id) => {
+    // Fetch mentors that are in the same department
+    const mentors = await db.select('*').from('mentors').where('track_id', '=', track_id);
+    return mentors;
+};
+
+const getMentorsForMenteeId = async (req, res, db) => {
+    try {
+        const menteeId = req.query.menteeId;
+
+        const user = await getMenteeDetails(db, menteeId);
+
+        // Logic to determine the mentee's department
+        const track_id = user.trackId;
+        console.log(`user : ${JSON.stringify(user)}`)
+
+        // Logic to fetch mentors from the same department
+        const mentors = await getMentorsByDepartment(db, track_id);
+
+        res.json(mentors);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
-    getMentors, 
+    getMentors,
+    getMentorsForMenteeId,
     MAX_MENTEE_CHOICES,
     MAX_MENTOR_SIGNUPS
 }
