@@ -22,25 +22,40 @@ const handleUserGet = (req, res, db) => {
 };
 
 const handleUserPost = (req, res, db) => {
-    const { id, email, name } = req.body;
+    const { uid, email, name } = req.body;
     if (!email || !name) {
         return res.status(400).json('incorrect form submission');
     }
 
-    db('users')
-        .returning('*')
-        .insert({
-            id: id,
-            email: email,
-            name: name,
-            joined: new Date()
-        })
-        .then(user => {
-            res.json(user[0]);
+    // Check if the email exists in the MENTEES table
+    db.select('*').from('mentees').where({ email })
+        .then(mentee => {
+            if (mentee.length) {
+                // Email exists in MENTEES, proceed with inserting into USERS table
+                return db('users')
+                    .returning('*')
+                    .insert({
+                        uid: uid,
+                        email: email,
+                        name: name,
+                        joined: new Date()
+                    })
+                    .then(user => {
+                        // Respond with user details and track_id
+                        res.json({ ...user[0], track_id: mentee[0].track_id });
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(400).json('unable to register: ' + err);
+                    });
+            } else {
+                // Email does not exist in MENTEES
+                res.status(400).json('email not found in mentees');
+            }
         })
         .catch(err => {
-            console.log(err)
-            res.status(400).json('unable to register: ' + err)
+            console.log(err);
+            res.status(400).json('error checking mentees');
         });
 }
 
