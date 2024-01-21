@@ -1,8 +1,12 @@
 const signupMenteeForMentor = async (db, menteeId, mentorId, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
     try {
+        if (menteeId === undefined || mentorId === undefined) {
+            throw new Error('Invalid mentee or mentor ID'); // !TODO-akhilz Please send these as 400
+        }
+        console.log(`menteeId ${menteeId} mentorId ${mentorId}`);
         await db.transaction(async trx => {
             const mentee = await trx('users').where({ uid: menteeId }).first();
-            const mentor = await trx('mentors').where({ id: mentorId }).first();
+            const mentor = await trx('mentors').where({ mentor_id: mentorId }).first();
 
             if (!mentee || !mentor) {
                 throw new Error('Mentor or mentee not found');
@@ -27,7 +31,7 @@ const signupMenteeForMentor = async (db, menteeId, mentorId, MAX_MENTEE_CHOICES,
                 .update({ current_mentor_count: mentee.current_mentor_count + 1 });
 
             await trx('mentors')
-                .where({ id: mentorId })
+                .where({ mentor_id: mentorId })
                 .update({ current_mentee_count: mentor.current_mentee_count + 1 });
         });
 

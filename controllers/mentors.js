@@ -50,14 +50,21 @@ const getMenteeDepartment = async (db, menteeId) => {
     return result.track_id;
 };
 
-const getMentorsByDepartment = async (db, track_id, MAX_MENTOR_CAPACITY) => {
+const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTOR_CAPACITY) => {
     // Fetch mentors that are in the same department
-    const mentors = await db.select('*').from('mentors').where('track_id', '=', track_id);
-    // add a member called max_mentor_capacity to each member of mentors array
+    const mentors = await db('mentors as m')
+        .select(
+            'm.*',
+            db.raw('CASE WHEN s.mentor_id IS NOT NULL THEN TRUE ELSE FALSE END as is_registered')
+        )
+        .leftJoin('signups as s', function () {
+            this.on('m.mentor_id', '=', 's.mentor_id').andOn('s.mentee_id', '=', db.raw('?', [mentee_id]))
+        })
+        .where('m.track_id', '=', track_id);    // add a member called max_mentor_capacity to each member of mentors array
     return mentors.map(mentor => ({
         ...mentor,
         max_mentor_capacity: MAX_MENTOR_CAPACITY,
-    }))
+    })).sort((a, b) => a.mentor_id - b.mentor_id)
 };
 
 const getMentorsForMenteeId = async (req, res, db, MAX_MENTOR_CAPACITY) => {
@@ -68,10 +75,9 @@ const getMentorsForMenteeId = async (req, res, db, MAX_MENTOR_CAPACITY) => {
 
         // Logic to determine the mentee's department
         const track_id = user.trackId;
-        console.log(`user : ${JSON.stringify(user)}`)
 
         // Logic to fetch mentors from the same department
-        const mentors = await getMentorsByDepartment(db, track_id, MAX_MENTOR_CAPACITY);
+        const mentors = await getMentorsByDepartment(db, menteeId, track_id, MAX_MENTOR_CAPACITY);
 
         res.json(mentors);
     } catch (error) {
