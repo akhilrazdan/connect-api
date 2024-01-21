@@ -12,7 +12,11 @@ const mentorSignup = require('./controllers/mentorSignup.js');
 const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
 const mentorsForMentee = require('./controllers/mentorsForMentee.js');
+const signups = require('./controllers/signups.js')
 
+// Constants for capacities
+const MAX_MENTOR_CAPACITY = 3; // Max number of mentees a mentor can have
+const MAX_MENTEE_CHOICES = 3;  // Max number of mentors a mentee can sign up for
 
 const db = knex({
   // connect to your own database here:
@@ -44,10 +48,20 @@ app.post('/imageurl', (req, res) => { image.handleApiCall(req, res) })
 app.post('/mentorSignup', (req, res) => { mentorSignup.handleMentorSignup(req, res, db) })
 app.get('/mentors', async (req, res) => {
   try {
-    await mentors.getMentorsForMenteeId(req, res, db);
+    await mentors.getMentorsForMenteeId(req, res, db, MAX_MENTOR_CAPACITY);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+app.post('/signup', async (req, res) => {
+  const { menteeId, mentorId } = req.body;
+
+  try {
+    const result = await signups.signupMenteeForMentor(db, menteeId, mentorId, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error during signup', error: error.message });
   }
 });
 // app.get('/mentors', (req, res) => { mentors.getMentors(req, res, db) })

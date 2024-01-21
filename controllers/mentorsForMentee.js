@@ -2,8 +2,8 @@ const { response } = require('express')
 const mentors = require('./mentors')
 
 const getChoicesForMentee = async (id, db, mentorsList, res) => {
-    db.select("users.id",
-        db.raw("(SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentee_id = users.id) AS signups_total"))
+    db.select("users.uid",
+        db.raw("(SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentee_id = users.uid) AS signups_total"))
         .from('users')
         .where({ id })
         .then(data => {
@@ -23,6 +23,7 @@ const getChoicesForMentee = async (id, db, mentorsList, res) => {
         })
         .catch(err => console.error(err))
 }
+
 const getMentorsForMentee = (req, res, db) => {
     // query = 'mentors.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees'
     const { menteeId } = req.params;
