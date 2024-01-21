@@ -5,8 +5,22 @@ const signupMenteeForMentor = async (db, menteeId, mentorId, MAX_MENTEE_CHOICES,
         }
         console.log(`menteeId ${menteeId} mentorId ${mentorId}`);
         await db.transaction(async trx => {
-            const mentee = await trx('users').where({ uid: menteeId }).first();
-            const mentor = await trx('mentors').where({ mentor_id: mentorId }).first();
+            const mentee = await trx('users')
+                .join('mentees', 'users.email', '=', 'mentees.email')
+                .leftJoin('signups', 'users.uid', '=', 'signups.mentee_id')
+                .where({ 'users.uid': menteeId })
+                .select('users.*', 'mentees.track_id')
+                .countDistinct('signups.mentor_id as current_mentor_count')
+                .groupBy('users.uid', 'mentees.track_id')
+                .first();
+
+            const mentor = await trx('mentors')
+                .leftJoin('signups', 'mentors.mentor_id', '=', 'signups.mentor_id')
+                .where({ 'mentors.mentor_id': mentorId })
+                .select('mentors.*')
+                .countDistinct('signups.mentee_id as current_mentee_count')
+                .groupBy('mentors.mentor_id')
+                .first();
 
             if (!mentee || !mentor) {
                 throw new Error('Mentor or mentee not found');
@@ -25,14 +39,6 @@ const signupMenteeForMentor = async (db, menteeId, mentorId, MAX_MENTEE_CHOICES,
             }
 
             await trx('signups').insert({ mentee_id: menteeId, mentor_id: mentorId });
-
-            await trx('users')
-                .where({ uid: menteeId })
-                .update({ current_mentor_count: mentee.current_mentor_count + 1 });
-
-            await trx('mentors')
-                .where({ mentor_id: mentorId })
-                .update({ current_mentee_count: mentor.current_mentee_count + 1 });
         });
 
         return { message: 'Signup successful' };

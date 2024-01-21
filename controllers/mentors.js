@@ -53,14 +53,18 @@ const getMenteeDepartment = async (db, menteeId) => {
 const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTOR_CAPACITY) => {
     // Fetch mentors that are in the same department
     const mentors = await db('mentors as m')
+        .leftJoin('signups as s', function () {
+            this.on('m.mentor_id', '=', 's.mentor_id')
+                .andOn('s.mentee_id', '=', db.raw('?', [mentee_id]))
+        })
+        .leftJoin(db('signups as s2').select('s2.mentor_id').count('* as current_mentee_count').groupBy('s2.mentor_id').as('s2'), 'm.mentor_id', '=', 's2.mentor_id')
         .select(
             'm.*',
-            db.raw('CASE WHEN s.mentor_id IS NOT NULL THEN TRUE ELSE FALSE END as is_registered')
+            db.raw('CASE WHEN s.mentor_id IS NOT NULL THEN TRUE ELSE FALSE END as is_registered'),
+            db.raw('COALESCE(s2.current_mentee_count, 0) as current_mentee_count')
         )
-        .leftJoin('signups as s', function () {
-            this.on('m.mentor_id', '=', 's.mentor_id').andOn('s.mentee_id', '=', db.raw('?', [mentee_id]))
-        })
-        .where('m.track_id', '=', track_id);    // add a member called max_mentor_capacity to each member of mentors array
+        .where('m.track_id', '=', track_id)
+        .orderBy('m.mentor_id');
     return mentors.map(mentor => ({
         ...mentor,
         max_mentor_capacity: MAX_MENTOR_CAPACITY,

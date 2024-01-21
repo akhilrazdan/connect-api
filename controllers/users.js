@@ -38,7 +38,6 @@ const handleUserPost = (req, res, db) => {
                         uid: uid,
                         email: email,
                         name: name,
-                        track_id: mentee[0].track_id,
                         joined: new Date()
                     })
                     .then(user => {
