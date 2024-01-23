@@ -21,7 +21,7 @@ const handleUserGet = (req, res, db) => {
         });
 };
 
-const handleUserPost = (req, res, db) => {
+const createUser = (req, res, db) => {
     const { uid, email, name } = req.body;
     if (!email || !name) {
         return res.status(400).json('incorrect form submission');
@@ -61,5 +61,5 @@ const handleUserPost = (req, res, db) => {
 
 module.exports = {
     handleUserGet,
-    handleUserPost
+    createUser
 }

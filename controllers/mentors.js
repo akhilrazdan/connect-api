@@ -1,20 +1,4 @@
 
-// const getMentors = (res, db) => {
-//     // query = 'mentors.*, (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees'
-
-//     db.select("mentors.*", db.raw("(SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS total_mentees"), db.raw("? - (SELECT COUNT(*) FROM Mentor_Mentee_Relationship WHERE Mentor_Mentee_Relationship.mentor_id = mentors.id) AS available_slots", [MAX_MENTOR_SIGNUPS])).from('mentors')
-//         .then(data => {
-//             if (data.length) {
-//                 console.log("Server returning all mentors")
-//                 console.log(data)
-//                 res.json(data)
-//             } else {
-//                 res.status(400).json('No mentors!')
-//             }
-//         })
-//         .catch(err => res.status(400).json(err))
-// }
-
 const getMenteeDetails = async (db, uid) => {
     try {
         const menteeDetails = await db.select(
@@ -50,7 +34,7 @@ const getMenteeDepartment = async (db, menteeId) => {
     return result.track_id;
 };
 
-const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTOR_CAPACITY) => {
+const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
     // Fetch mentors that are in the same department
     const mentors = await db('mentors as m')
         .leftJoin('iaf as i', 'm.iaf_id', '=', 'i.iaf_id') // Join with the iaf table
@@ -68,13 +52,19 @@ const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTOR_CAPACI
         )
         .where('m.track_id', '=', track_id)
         .orderBy('m.mentor_id');
-    return mentors.map(mentor => ({
+    const sortedMentors = mentors.map(mentor => ({
         ...mentor,
         max_mentor_capacity: MAX_MENTOR_CAPACITY,
     })).sort((a, b) => a.mentor_id - b.mentor_id)
+    const signups_total = mentors.reduce((count, mentor) => mentor.is_registered ? count + 1 : count, 0);
+    return {
+        mentors: sortedMentors,
+        signupsTotal: signups_total,
+        maxMenteeChoices: MAX_MENTEE_CHOICES
+    }
 };
 
-const getMentorsForMenteeId = async (req, res, db, MAX_MENTOR_CAPACITY) => {
+const getMentorsForMenteeId = async (req, res, db, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
     try {
         const menteeId = req.query.menteeId;
 
@@ -84,7 +74,7 @@ const getMentorsForMenteeId = async (req, res, db, MAX_MENTOR_CAPACITY) => {
         const track_id = user.trackId;
 
         // Logic to fetch mentors from the same department
-        const mentors = await getMentorsByDepartment(db, menteeId, track_id, MAX_MENTOR_CAPACITY);
+        const mentors = await getMentorsByDepartment(db, menteeId, track_id, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
 
         res.json(mentors);
     } catch (error) {

@@ -3,15 +3,8 @@ const bodyParser = require('body-parser'); // latest version of exressJS now com
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require('knex');
-
-const register = require('./controllers/register');
-const signin = require('./controllers/signin');
-const profile = require('./controllers/profile');
-const image = require('./controllers/image');
-const mentorSignup = require('./controllers/mentorSignup.js');
 const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
-const mentorsForMentee = require('./controllers/mentorsForMentee.js');
 const signups = require('./controllers/signups.js')
 
 // Constants for capacities
@@ -49,16 +42,11 @@ app.use(cors())
 app.use(express.json()); // latest version of exressJS now comes with Body-Parser!
 
 app.get('/', (req, res) => { res.send('it is working') })
-// app.post('/signin', signin.handleSignin(db, bcrypt))
-// app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) })
-app.post('/user', (req, res) => { users.handleUserPost(req, res, db) })
+app.post('/user', (req, res) => { users.createUser(req, res, db) })
 app.get('/user/:uid', (req, res) => { users.handleUserGet(req, res, db) })
-app.put('/image', (req, res) => { image.handleImage(req, res, db) })
-app.post('/imageurl', (req, res) => { image.handleApiCall(req, res) })
-app.post('/mentorSignup', (req, res) => { mentorSignup.handleMentorSignup(req, res, db) })
 app.get('/mentors', async (req, res) => {
   try {
-    await mentors.getMentorsForMenteeId(req, res, db, MAX_MENTOR_CAPACITY);
+    await mentors.getMentorsForMenteeId(req, res, db, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error: error.message });
