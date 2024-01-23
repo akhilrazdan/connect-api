@@ -22,23 +22,26 @@ require('dotenv').config();
 const DATABASE_URL = process.env.DATABASE_URL;
 const DATABASE_NAME = process.env.DATABASE_NAME;
 const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD;
+const NODE_ENV = process.env.NODE_ENV;
 
-console.log(`DATABASE_URL: ${DATABASE_URL}, DATABASE_NAME: ${DATABASE_NAME}, DATABASE_PASSWORD: ${DATABASE_PASSWORD}`);
+console.log(`DATABASE_URL: ${DATABASE_URL}, DATABASE_NAME: ${DATABASE_NAME}, DATABASE_PASSWORD: ${DATABASE_PASSWORD} NODE_ENV: ${NODE_ENV}`);
 
-const db = knex({
-  // connect to your own database here:
+const dbConfig = {
   client: 'pg',
   connection: {
-    // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a/connections
-    // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com/connections
-    // dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com
-    host: DATABASE_URL,
+    host: process.env.DATABASE_URL,
     user: 'akhilz',
-    password: DATABASE_PASSWORD,
-    database: DATABASE_NAME
-    // ssl: { rejectUnauthorized: false }
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_NAME
   }
-});
+};
+
+// Add SSL configuration in production environment
+if (process.env.NODE_ENV === 'production') {
+  dbConfig.connection.ssl = { rejectUnauthorized: false };
+}
+
+const db = knex(dbConfig);
 
 const app = express();
 
