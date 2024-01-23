@@ -18,6 +18,13 @@ const signups = require('./controllers/signups.js')
 const MAX_MENTOR_CAPACITY = 3; // Max number of mentees a mentor can have
 const MAX_MENTEE_CHOICES = 3;  // Max number of mentors a mentee can sign up for
 
+require('dotenv').config();
+const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_NAME = process.env.DATABASE_NAME;
+const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD;
+
+console.log(`DATABASE_URL: ${DATABASE_URL}, DATABASE_NAME: ${DATABASE_NAME}, DATABASE_PASSWORD: ${DATABASE_PASSWORD}`);
+
 const db = knex({
   // connect to your own database here:
   client: 'pg',
@@ -25,10 +32,10 @@ const db = knex({
     // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a/connections
     // postgres://akhilz:XKT74yP5FQLlSo1fLXOhShT8J4s4TilC@dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com/connections
     // dpg-cfg52ig2i3mg6pb1dcj0-a.oregon-postgres.render.com
-    host: process.env.DB_URI || "127.0.0.1",
+    host: DATABASE_URL,
     user: 'akhilz',
-    password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "connectionsv2"
+    password: DATABASE_PASSWORD,
+    database: DATABASE_NAME
     // ssl: { rejectUnauthorized: false }
   }
 });
