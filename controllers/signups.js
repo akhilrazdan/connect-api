@@ -1,4 +1,4 @@
-const signupMenteeForMentor = async (db, menteeId, mentorId, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
+const signupMenteeForMentor = async (db, menteeId, mentorId, max_mentee_choices, max_mentor_capacity) => {
     try {
         if (menteeId === undefined || mentorId === undefined) {
             throw new Error('Invalid mentee or mentor ID'); // !TODO-akhilz Please send these as 400
@@ -30,11 +30,11 @@ const signupMenteeForMentor = async (db, menteeId, mentorId, MAX_MENTEE_CHOICES,
                 throw new Error(`Mentee and mentor are not in the same department ${mentee.track_id} ${mentor.track_id}`); // TODO-akhilz This is a 400 error, currently going as 500
             }
 
-            if (mentee.current_mentor_count >= MAX_MENTEE_CHOICES) {
+            if (mentee.current_mentor_count >= max_mentee_choices) {
                 throw new Error('Mentee has reached maximum choices');
             }
 
-            if (mentor.current_mentee_count >= MAX_MENTOR_CAPACITY) {
+            if (mentor.current_mentee_count >= max_mentor_capacity) {
                 throw new Error('Mentor has reached maximum capacity');
             }
 

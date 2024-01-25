@@ -5,7 +5,8 @@ const cors = require('cors');
 const knex = require('knex');
 const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
-const signups = require('./controllers/signups.js')
+const signups = require('./controllers/signups.js');
+const checkUserRole = require('./controllers/roles.js');
 
 // Constants for capacities
 const MAX_MENTOR_CAPACITY = 3; // Max number of mentees a mentor can have
@@ -38,12 +39,15 @@ const db = knex(dbConfig);
 
 const app = express();
 
+
 app.use(cors())
 app.use(express.json()); // latest version of exressJS now comes with Body-Parser!
 
 app.get('/', (req, res) => { res.send('it is working') })
+app.use(checkUserRole(db))
+app.get('/user', (req, res) => { users.handleUserGet(req, res, db) })
+
 app.post('/user', (req, res) => { users.createUser(req, res, db) })
-app.get('/user/:uid', (req, res) => { users.handleUserGet(req, res, db) })
 app.get('/mentors', async (req, res) => {
   try {
     await mentors.getMentorsForMenteeId(req, res, db, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
@@ -53,9 +57,10 @@ app.get('/mentors', async (req, res) => {
   }
 });
 app.post('/signup', async (req, res) => {
-  const { menteeId, mentorId } = req.body;
+  const { mentorId } = req.body;
 
   try {
+    const { uid: menteeId } = req.user;
     const result = await signups.signupMenteeForMentor(db, menteeId, mentorId, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
     res.json(result);
   } catch (error) {

@@ -66,7 +66,7 @@ const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTEE_CHOICE
 
 const getMentorsForMenteeId = async (req, res, db, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
     try {
-        const menteeId = req.query.menteeId;
+        const menteeId = req.user.uid;
 
         const user = await getMenteeDetails(db, menteeId);
 
