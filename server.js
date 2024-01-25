@@ -39,7 +39,6 @@ const db = knex(dbConfig);
 
 const app = express();
 
-
 app.use(cors())
 app.use(express.json()); // latest version of exressJS now comes with Body-Parser!
 

@@ -2,7 +2,7 @@ const admin = require('../controllers/firebaseAdmin');
 
 const checkUserRole = (db) => {
     return async (req, res, next) => {
-
+        console.log("checking user role")
         const { authorization } = req.headers;
         if (!authorization || !authorization.startsWith('Bearer ')) {
             return res.status(403).json({ error: 'Unauthorized' });

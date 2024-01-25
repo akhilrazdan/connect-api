@@ -10,6 +10,7 @@ const updateUserRole = async (uid, email, newRoleId) => {
 const handleUserGet = async (req, res, db) => {
     const { uid, email } = req.user; // Extracted from verified ID token by your middleware
     try {
+        console.log("Getting user ")
         const users = await db.select('*').from('users').where({ uid });
         const isExistingUser = users.length > 0;
 
