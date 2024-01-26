@@ -7,6 +7,8 @@ const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
 const signups = require('./controllers/signups.js');
 const checkUserRole = require('./controllers/roles.js');
+const userclaims = require('./controllers/userclaims.js');
+
 
 // Constants for capacities
 const MAX_MENTOR_CAPACITY = 3; // Max number of mentees a mentor can have
@@ -43,11 +45,12 @@ app.use(cors())
 app.use(express.json()); // latest version of exressJS now comes with Body-Parser!
 
 app.get('/', (req, res) => { res.send('it is working') })
-app.use(checkUserRole(db))
-app.get('/user', (req, res) => { users.handleUserGet(req, res, db) })
+app.get('/user', checkUserRole(db), (req, res) => { users.handleUserGet(req, res, db) })
 
-app.post('/user', (req, res) => { users.createUser(req, res, db) })
-app.get('/mentors', async (req, res) => {
+app.post('/user', checkUserRole(db), (req, res) => { users.createUser(req, res, db) })
+app.post('/userclaims', checkUserRole(db), (req, res) => { userclaims.setUserClaims(req, res, db) })
+
+app.get('/mentors', checkUserRole(db), async (req, res) => {
   try {
     await mentors.getMentorsForMenteeId(req, res, db, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
   } catch (error) {
@@ -55,7 +58,7 @@ app.get('/mentors', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-app.post('/signup', async (req, res) => {
+app.post('/signup', checkUserRole(db), async (req, res) => {
   const { mentorId } = req.body;
 
   try {
