@@ -1,13 +1,6 @@
 const { json } = require('body-parser');
 const admin = require('./firebaseAdmin');
 
-// This function updates the user's role in the database and Firebase custom claims
-const updateUserRole = async (uid, email, newRoleId) => {
-    await db('users').where({ uid }).update({ email, role_id: newRoleId });
-    const newClaims = { role: newRoleId === 2 ? 'mentee' : 'guest' };
-    await admin.auth().setCustomUserClaims(uid, newClaims);
-};
-
 const handleUserGet = async (req, res, db) => {
     const { uid, email } = req.user; // Extracted from verified ID token by your middleware
     try {
@@ -16,9 +9,8 @@ const handleUserGet = async (req, res, db) => {
         const isExistingUser = users.length > 0;
 
         if (isExistingUser) {
-            res.json({ ...users[0], role_id: newRoleId });
+            res.json({ ...users[0] });
         } else {
-            // User does not exist, create a new user with default role 'guest'
             res.status(404).json('User not found');
         }
     } catch (err) {
@@ -26,6 +18,25 @@ const handleUserGet = async (req, res, db) => {
         res.status(400).json('Error processing request');
     }
 };
+
+const isMenteeAllowListed = async (req, res, db) => {
+    const { email } = req.user; // Extracted from verified ID token by your middleware
+    try {
+        console.log(`isMenteeAllowListed ${JSON.stringify(req.body)}`)
+        const users = await db.select('*').from('mentees').where({ email });
+        const isMenteeAllowListed = users.length > 0 && users[0].role_id == 2;
+        console.log(`isMenteeAllowListed ${isMenteeAllowListed}`)
+        if (isMenteeAllowListed) {
+            res.json({ isMenteeAllowListed });
+        } else {
+            res.status(404).json('User not found');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(400).json('Error processing request');
+    }
+};
+
 
 
 const createUser = (req, res, db) => {
@@ -59,5 +70,6 @@ const createUser = (req, res, db) => {
 
 module.exports = {
     handleUserGet,
+    isMenteeAllowListed,
     createUser
 }

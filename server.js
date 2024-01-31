@@ -46,6 +46,8 @@ app.use(express.json()); // latest version of exressJS now comes with Body-Parse
 
 app.get('/', (req, res) => { res.send('it is working') })
 app.get('/user', checkUserRole(db), (req, res) => { users.handleUserGet(req, res, db) })
+app.get('/allowed', checkUserRole(db), (req, res) => { users.isMenteeAllowListed(req, res, db) })
+
 
 app.post('/user', checkUserRole(db), (req, res) => { users.createUser(req, res, db) })
 app.post('/userclaims', checkUserRole(db), (req, res) => { userclaims.setUserClaims(req, res, db) })
