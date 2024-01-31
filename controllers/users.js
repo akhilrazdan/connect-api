@@ -24,6 +24,7 @@ const isMenteeAllowListed = async (req, res, db) => {
     try {
         console.log(`isMenteeAllowListed ${JSON.stringify(req.body)}`)
         const users = await db.select('*').from('mentees').where({ email });
+        console.log(`users ${JSON.stringify(users)}`)
         const isMenteeAllowListed = users.length > 0 && users[0].role_id == 2;
         console.log(`isMenteeAllowListed ${isMenteeAllowListed}`)
         if (isMenteeAllowListed) {
