@@ -4,12 +4,14 @@ const getMenteeDetails = async (db, uid) => {
         const menteeDetails = await db.select(
             'mentees.email as menteeEmail',
             'mentees.track_id as trackId',
+            'tracks.name as trackName',
             'users.uid as userId',
             'users.name as userName',
             'users.joined as userJoined'
         )
             .from('mentees')
             .leftJoin('users', 'mentees.email', 'users.email')
+            .leftJoin('tracks', 'mentees.track_id', 'tracks.id',)
             .where('users.uid', uid)
             .first();  // Assuming UID is unique and you want a single record
 
@@ -24,17 +26,7 @@ const getMenteeDetails = async (db, uid) => {
     }
 };
 
-
-const getMenteeDepartment = async (db, menteeId) => {
-    // Fetch the mentee's department based on menteeId
-    const result = await db.select('track_id').from('users').where('uid', '=', menteeId).first();
-    if (!result) {
-        throw new Error(`Mentee with ID ${menteeId} not found.`);
-    }
-    return result.track_id;
-};
-
-const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
+const getMentorsByDepartment = async (db, mentee_id, track_id, track_name, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY) => {
     // Fetch mentors that are in the same department
     const mentors = await db('mentors as m')
         .leftJoin('iaf as i', 'm.iaf_id', '=', 'i.iaf_id') // Join with the iaf table
@@ -60,7 +52,8 @@ const getMentorsByDepartment = async (db, mentee_id, track_id, MAX_MENTEE_CHOICE
     return {
         mentors: sortedMentors,
         signupsTotal: signups_total,
-        maxMenteeChoices: MAX_MENTEE_CHOICES
+        maxMenteeChoices: MAX_MENTEE_CHOICES,
+        trackName: track_name,
     }
 };
 
@@ -68,13 +61,10 @@ const getMentorsForMenteeId = async (req, res, db, MAX_MENTEE_CHOICES, MAX_MENTO
     try {
         const menteeId = req.user.uid;
 
-        const user = await getMenteeDetails(db, menteeId);
-
-        // Logic to determine the mentee's department
-        const track_id = user.trackId;
+        const { trackId: track_id, trackName: track_name } = await getMenteeDetails(db, menteeId);
 
         // Logic to fetch mentors from the same department
-        const mentors = await getMentorsByDepartment(db, menteeId, track_id, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
+        const mentors = await getMentorsByDepartment(db, menteeId, track_id, track_name, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
 
         res.json(mentors);
     } catch (error) {
