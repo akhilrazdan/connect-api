@@ -41,12 +41,16 @@ const isMenteeAllowListed = async (req, res, db) => {
 
 
 const createUser = (req, res, db) => {
-    console.log(`handleUserCreate ${JSON.stringify(req.body)}`)
+    console.log(`handleUserCreate ${JSON.stringify(req.body)} ${req.user}`)
     const { uid, email } = req.user;
     const { name } = req.body;
-    if (!email || !name) {
-        return res.status(400).json('incorrect form submission; Name or email missing');
+    if (!email) {
+        return res.status(400).json('incorrect form submission; Email missing');
     }
+    if (!name) {
+        console.log(`Name is missing for this request`)
+    }
+
 
     // Insert user into USERS table with determined role_id
     return db('users')
