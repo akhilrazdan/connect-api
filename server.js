@@ -6,6 +6,7 @@ const knex = require('knex');
 const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
 const signups = require('./controllers/signups.js');
+const admin = require('./controllers/admin.js')
 const verifyToken = require('./controllers/roles.js');
 const userclaims = require('./controllers/userclaims.js');
 
@@ -74,6 +75,12 @@ app.post('/signup', verifyToken(), async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error during signup', error: error.message });
   }
+});
+app.get('/download-report', verifyToken(), async (req, res) => {
+  admin.downloadSignups(req, res, db)
+});
+app.get('/statistics', verifyToken(), async (req, res) => {
+  admin.getStatistics(req, res, db)
 });
 // app.get('/mentors', (req, res) => { mentors.getMentors(req, res, db) })
 // app.get('/mentors/:menteeId', (req, res) => { mentorsForMentee.getMentorsForMentee(req, res, db) })
