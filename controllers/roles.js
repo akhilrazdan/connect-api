@@ -1,6 +1,6 @@
 const admin = require('../controllers/firebaseAdmin');
 
-const checkUserRole = (db) => {
+const verifyToken = () => {
     return async (req, res, next) => {
         const { authorization } = req.headers;
         if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -11,7 +11,7 @@ const checkUserRole = (db) => {
         try {
             // Verify the ID token and decode its payload
             const decodedToken = await admin.auth().verifyIdToken(idToken);
-            console.log('Decoded token:', decodedToken);
+            console.log(`Decoded token: ${decodedToken.email} ${decodedToken.uid}`)
             req.user = decodedToken;
             next();
         } catch (error) {
@@ -20,4 +20,4 @@ const checkUserRole = (db) => {
         }
     };
 }
-module.exports = checkUserRole;
+module.exports = verifyToken;

@@ -6,7 +6,7 @@ const knex = require('knex');
 const users = require('./controllers/users.js')
 const mentors = require('./controllers/mentors.js');
 const signups = require('./controllers/signups.js');
-const checkUserRole = require('./controllers/roles.js');
+const verifyToken = require('./controllers/roles.js');
 const userclaims = require('./controllers/userclaims.js');
 
 
@@ -43,16 +43,20 @@ const app = express();
 
 app.use(cors())
 app.use(express.json()); // latest version of exressJS now comes with Body-Parser!
+app.use((req, res, next) => {
+  console.log(`API called: ${req.method} ${req.path}`);
+  next(); // Continue to the next middleware or route handler
+});
+
 
 app.get('/', (req, res) => { res.send('it is working') })
-app.get('/user', checkUserRole(db), (req, res) => { users.handleUserGet(req, res, db) })
-app.get('/allowed', checkUserRole(db), (req, res) => { users.isMenteeAllowListed(req, res, db) })
+app.get('/user', verifyToken(), userclaims.maybeSetUserClaims(db), (req, res) => { users.handleUserGet(req, res, db) })
+app.get('/allowed', verifyToken(), userclaims.maybeSetUserClaims(db), (req, res) => { users.isMenteeAllowListed(req, res, db) })
 
+app.post('/user', verifyToken(), userclaims.maybeSetUserClaims(db), (req, res) => { users.createUser(req, res, db) })
+app.post('/userclaims', verifyToken(), (req, res) => { userclaims.maybeSetUserClaims(req, res, db) })
 
-app.post('/user', checkUserRole(db), (req, res) => { users.createUser(req, res, db) })
-app.post('/userclaims', checkUserRole(db), (req, res) => { userclaims.setUserClaims(req, res, db) })
-
-app.get('/mentors', checkUserRole(db), async (req, res) => {
+app.get('/mentors', verifyToken(), userclaims.maybeSetUserClaims(db), async (req, res) => {
   try {
     await mentors.getMentorsForMenteeId(req, res, db, MAX_MENTEE_CHOICES, MAX_MENTOR_CAPACITY);
   } catch (error) {
@@ -60,7 +64,7 @@ app.get('/mentors', checkUserRole(db), async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-app.post('/signup', checkUserRole(db), async (req, res) => {
+app.post('/signup', verifyToken(), async (req, res) => {
   const { mentorId } = req.body;
 
   try {
