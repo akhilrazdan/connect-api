@@ -14,7 +14,7 @@ const getStatistics = async (req, res, db) => {
         const menteesNotSignedUp = await db('mentees as m')
             .leftJoin('users as u', 'm.email', 'u.email')
             .leftJoin('signups as s', 'u.uid', 's.mentee_id')
-            .select('u.email', 'u.name')
+            .select('m.email', 'u.name')
             .where('m.role_id', 2)
             .andWhere('s.mentee_id', null);
 
