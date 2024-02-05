@@ -44,7 +44,7 @@ const downloadSignups = async (req, res, db) => {
                 'mt.name as mentor_name',
                 'mt.track_id',
                 'mt.iaf_id',
-                db.raw("s.signed_up_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' as signed_up_at")
+                db.raw("s.signed_up_at as signed_up_at")
             ])
             .orderBy('signed_up_at', 'desc');
 
@@ -52,7 +52,7 @@ const downloadSignups = async (req, res, db) => {
             return {
                 ...signup,
                 signed_up_at: signup.signed_up_at
-                    ? moment(signup.signed_up_at).tz('America/Los_Angeles').format()
+                    ? moment(signup.signed_up_at).format()
                     : ''
             };
         });
